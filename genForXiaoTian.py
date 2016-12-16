@@ -1,7 +1,9 @@
-from openpyxl import *
-#from openpyxl.compat import range
-#from openpyxl.utils import get_column_letter
+import os
+import sys
 import re
+
+from openpyxl import *
+from openpyxl.styles import *
 
 ##chip = {
 ##    0 : PRESSO54608
@@ -55,9 +57,15 @@ def gen_excel(excelSour):
     ws1.append(['','Id','Prj','Chip','Board Type','Os','IDE','Target',\
                 'Test Env','Module','Testcase','B-Res','Result','Comment',\
                 'CRID','Testor'])
+    for col in range(1,26):
+        cell=ws1.cell(row=2,column=col)
+        cell.font=Font(size=13,bold=True)
 
     ws2 = wb.create_sheet(title = "binary test")
     ws2.append(['Examples','Platform','Tester'])
+    for col in range(1,26):
+        cell=ws2.cell(row=1,column=col)
+        cell.font=Font(size=13,bold=True)
     
     getSour = load_workbook(excelSour,read_only = True)
     getDetail = getSour.get_sheet_by_name('Details')
@@ -153,6 +161,17 @@ def gen_excel(excelSour):
         row +=1
         case = getDetail.cell(row=row,column=2).value
     destName = excelSour[:-5]+'_task.xlsx'
+    ws1.page_setup.fitToHeight = 0
+    ws1.page_setup.fitToWidth = 1
+    ws2.page_setup.fitToHeight = 0
+    ws2.page_setup.fitToWidth = 1
     wb.save(filename = destName)
     return destName
 
+if __name__ == '__main__':
+    sys.stdout.flush()
+    sourceFile = sys.argv[1]
+    if '.xlsx' in sourceFile:
+        gen_excel(sourceFile)
+    else:
+        print 'please input right argument(.xlsx)'
