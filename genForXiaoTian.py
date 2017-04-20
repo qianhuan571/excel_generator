@@ -10,14 +10,15 @@ from openpyxl.styles import *
 ##    1 : K65F180M
 ##    }
 
+platformList = []
 osList = {
     'bm' : 'KSDK_bm',
+    'freertos' : 'KSDK_freertos',
     'ksdk_bm' : 'KSDK_bm',
+    'ksdk_freertos' : 'KSDK_freertos',
     'lite_bm' : 'KSDK_bm',
     'bm_release' : 'KSDK_bm',
-    'freertos_release' : 'KSDK_bm',
-    'freertos' : 'KSDK_freertos',
-    'ksdk_freertos' : 'KSDK_freertos'
+    'freertos_release' : 'KSDK_freertos',
     }
 testEnvList = {
     'default' : 'default_env',
@@ -96,6 +97,8 @@ def gen_excel(excelSour):
                 mod = 'otg'
             platform = getDetail.cell(row=row, column=col).value
             if platform != None:
+                if platform.split('_')[0] not in platformList:
+                    platformList.append(platform.split('_')[0])
                 boardType = platform.split('-')[0]
                 if '_' in platform:
                     chip = platform.split('-')[-1].split('_')[0]
@@ -129,6 +132,8 @@ def gen_excel(excelSour):
                 item = 'cv_test'
             elif bool(re.match('binary',temp,re.IGNORECASE)):
                 item = 'binary'
+            elif bool(re.match('document',temp,re.IGNORECASE)):
+                item = 'doc_review'
             else:
                 print 'the item cannot be recognized'
                 exit(0)
@@ -143,6 +148,8 @@ def gen_excel(excelSour):
         while (osTarget != None):
             platform = getDetail.cell(row=row,column=col).value
             if platform != None:
+                if platform.split('_')[0] not in platformList:
+                    platformList.append(platform.split('_')[0])
                 boardType = platform.split('-')[0]
                 if '_' in platform:
                     chip = platform.split('-')[-1].split('_')[0]
@@ -150,10 +157,18 @@ def gen_excel(excelSour):
                 else:
                     chip = platform.split('-')[-1]
                     mode = 'default'
-                count += 1
                 if 'binary' == item:
                     ws2.append([case,chip+'-'+boardType,''])
+                elif 'doc_review' == item:
+                    for platform in platformList:
+                        count += 1
+                        boardType = platform.split('-')[0]
+                        chip = platform.split('-')[-1]
+                        mode = 'default'
+                        ws1.append(['',str(count),chip+'-'+boardType+'-'+'KSDK_bm',chip,boardType,'KSDK_bm','IAR','release',\
+                        testEnvList[mode],moduleList['other'],case+caseSuffix,'','','','',''])
                 else:
+                    count += 1
                     ws1.append(['',str(count),chip+'-'+boardType+'-'+osList[osTarget.lower()],chip,boardType,osList[osTarget.lower()],'IAR',targetList[osTarget.lower()],\
                         testEnvList[mode],moduleList[mod],case+caseSuffix,'','','','',''])
             col += 1
@@ -175,3 +190,4 @@ if __name__ == '__main__':
         gen_excel(sourceFile)
     else:
         print 'please input right argument(.xlsx)'
+    print platformList
