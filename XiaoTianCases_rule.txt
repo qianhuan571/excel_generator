@@ -1,3 +1,5 @@
+Case attribute => column
+
 'prj'=>'C',
 'compiler'=>'G',
 'build_target'=>'H',
